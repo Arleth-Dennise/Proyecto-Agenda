@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prueba/event.dart';
+import 'package:agenda/event.dart';
 
 class EventScreen extends StatefulWidget {
   EventScreen(Event? event);
