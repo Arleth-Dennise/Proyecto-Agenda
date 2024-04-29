@@ -35,7 +35,6 @@ class _EventScreenState extends State<EventScreen> {
     final String title = _titleController.text;
     final String description = _descriptionController.text;
 
-    // Cerrar la pantalla de eventos y pasar los datos del evento a la pantalla anterior
     Navigator.pop(context, {'title': title, 'description': description, 'time': _selectedTime});
   }
 

@@ -22,7 +22,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // Creamos un documento para el usuario en Firestore
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
         'email': userCredential.user!.email,
       });
