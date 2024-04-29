@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'event.dart';
-import 'event_screen.dart';
+import 'package:agenda/event.dart';
+import 'package:agenda/event_screen.dart';
+import 'package:agenda/login_screen.dart';
 
 class Calendar extends StatefulWidget {
+   final User user;
+
+  const Calendar({Key? key, required this.user}) : super(key: key);
+
   @override
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State with TickerProviderStateMixin {
+class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
   late Map<DateTime, List<Event>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
@@ -57,6 +64,11 @@ class _CalendarState extends State with TickerProviderStateMixin {
     });
   }
 
+  void _signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,6 +77,12 @@ class _CalendarState extends State with TickerProviderStateMixin {
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 189, 140, 207),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () => _signOut(context),
+            icon: Icon(Icons.exit_to_app),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -80,21 +98,16 @@ class _CalendarState extends State with TickerProviderStateMixin {
             },
             startingDayOfWeek: StartingDayOfWeek.sunday,
             daysOfWeekVisible: true,
-
             onDaySelected: (DateTime selectDay, DateTime focusDay) {
               setState(() {
                 selectedDay = selectDay;
                 focusedDay = focusDay;
               });
-              print(focusedDay);
             },
             selectedDayPredicate: (DateTime date) {
               return isSameDay(selectedDay, date);
             },
-
             eventLoader: _getEventsfromDay,
-
-
             calendarStyle: CalendarStyle(
               isTodayHighlighted: true,
               selectedDecoration: BoxDecoration(
@@ -166,7 +179,7 @@ class _CalendarState extends State with TickerProviderStateMixin {
                                   },
                                   child: Text("Editar"),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: const Color.fromARGB(255, 28, 148, 32), // Color del texto del botón
+                                    foregroundColor: const Color.fromARGB(255, 28, 148, 32),
                                   ),
                                 ),
                                 TextButton(
@@ -176,7 +189,7 @@ class _CalendarState extends State with TickerProviderStateMixin {
                                   },
                                   child: Text("Eliminar"),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: Colors.red, // Color del texto del botón
+                                    foregroundColor: Colors.red,
                                   ),
                                 ),
                               ],
@@ -189,7 +202,7 @@ class _CalendarState extends State with TickerProviderStateMixin {
                       margin: EdgeInsets.symmetric(vertical: 4),
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white, // Color de fondo del contenedor de cada evento
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -236,8 +249,8 @@ class _CalendarState extends State with TickerProviderStateMixin {
         },
         label: Text("Añadir"),
         icon: Icon(Icons.add),
-        backgroundColor: const Color.fromARGB(255, 132, 202, 172), // Color de fondo del botón flotante
-        foregroundColor: Colors.black, // Color del icono y del texto del botón flotante
+        backgroundColor: const Color.fromARGB(255, 132, 202, 172),
+        foregroundColor: Colors.black,
       ),
     );
   }

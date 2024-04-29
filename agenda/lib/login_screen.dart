@@ -1,89 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agenda/calendario.dart';
 import 'package:agenda/registration_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isObscure = true;
+
+  void _signInWithEmailAndPassword(BuildContext context) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      if (userCredential.user != null) {
+
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Calendar(user: userCredential.user!)));
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Correo electrónico o contraseña incorrectos'),
+        ));
+      } else {
+        print('Error: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Iniciar sesión",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Iniciar sesión"),
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 189, 140, 207), // Color del AppBar
+        backgroundColor: Color.fromARGB(255, 189, 140, 207),
+        foregroundColor: Colors.white,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
                   Color.fromARGB(255, 205, 240, 208),
                   Color.fromARGB(255, 205, 232, 236),
                   Color.fromARGB(255, 209, 200, 238),
                   Color.fromARGB(255, 235, 200, 212),
                   Color.fromARGB(255, 215, 201, 220),
-            ], // Cambiar los colores del fondo
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Correo electrónico',
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 245, 254, 246), // Color del campo de texto
-                ),
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(labelText: 'Correo electrónico'),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _isObscure,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      suffixIcon: IconButton(
+                        icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            _isObscure = !_isObscure;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => _signInWithEmailAndPassword(context),
+                    child: Text("Iniciar sesión"),
+                  ),
+                  SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistrationScreen()));
+                    },
+                    child: Text("¿No tienes una cuenta? Regístrate"),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 245, 254, 246), // Color del campo de texto
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Calendar()),
-                  );
-                },
-                child: Text(
-                  "Iniciar sesión",
-                  style: TextStyle(color: Colors.black), // Color del texto del botón
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 132, 202, 172), // Color del botón
-                ),
-              ),
-              SizedBox(height: 10),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegistrationScreen()),
-                  );
-                },
-                child: Text(
-                  "¿No tienes una cuenta? Regístrate",
-                  style: TextStyle(color: Color.fromARGB(255, 16, 86, 19)), // Color del texto del botón
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
