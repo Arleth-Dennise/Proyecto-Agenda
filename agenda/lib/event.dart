@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Event {
@@ -8,5 +7,23 @@ class Event {
 
   Event({required this.title, required this.description, required this.time});
 
-  String toString() => this.title;
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'time': '${time.hour}:${time.minute}',
+    };
+  }
+
+  factory Event.fromJson(Map<String, dynamic> json) {
+  final timeParts = json['time'].split(':');
+  final hour = int.parse(timeParts[0]);
+  final minute = int.parse(timeParts[1]);
+  
+  return Event(
+    title: json['title'],
+    description: json['description'],
+    time: TimeOfDay(hour: hour, minute: minute),
+  );
+}
 }

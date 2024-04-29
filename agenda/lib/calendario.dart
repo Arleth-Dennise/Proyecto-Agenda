@@ -7,7 +7,7 @@ import 'package:agenda/event_screen.dart';
 import 'package:agenda/login_screen.dart';
 
 class Calendar extends StatefulWidget {
-   final User user;
+  final User user;
 
   const Calendar({Key? key, required this.user}) : super(key: key);
 
@@ -26,7 +26,23 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
   @override
   void initState() {
     selectedEvents = {};
+    loadEventsFromFirestore();
     super.initState();
+  }
+
+  Future<void> loadEventsFromFirestore() async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
+    final userData = await userDoc.get();
+    if (userData.exists) {
+      final eventsData = userData.data()?['events'] ?? {};
+      setState(() {
+        selectedEvents = Map.fromIterable(eventsData.keys,
+            key: (key) => DateTime.parse(key),
+            value: (key) => (eventsData[key] as List<dynamic>)
+                .map((eventJson) => Event.fromJson(eventJson as Map<String, dynamic>))
+                .toList());
+      });
+    }
   }
 
   List<Event> _getEventsfromDay(DateTime date) {
@@ -50,23 +66,30 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
         ifAbsent: () => [Event(title: title, description: description, time: time)],
       );
     });
+    saveEventsToFirestore();
   }
 
   void _editEvent(DateTime date, int index, String title, String description, TimeOfDay time) {
     setState(() {
       selectedEvents[date]![index] = Event(title: title, description: description, time: time);
     });
+    saveEventsToFirestore();
   }
 
   void _deleteEvent(DateTime date, int index) {
     setState(() {
       selectedEvents[date]!.removeAt(index);
     });
+    saveEventsToFirestore();
   }
 
-  void _signOut(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
+  Future<void> saveEventsToFirestore() async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
+    final eventData = selectedEvents.map((key, value) => MapEntry(
+          key.toString(),
+          value.map((event) => event.toJson()).toList(),
+        ));
+    await userDoc.set({'events': eventData}, SetOptions(merge: true));
   }
 
   @override
@@ -253,5 +276,10 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
         foregroundColor: Colors.black,
       ),
     );
+  }
+
+  void _signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
   }
 }
