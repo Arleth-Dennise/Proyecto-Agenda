@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:agenda/event.dart';
 
 class EventScreen extends StatefulWidget {
-  EventScreen(Event? event);
+  final Event? event;
+
+  EventScreen(this.event);
 
   @override
   _EventScreenState createState() => _EventScreenState();
@@ -11,13 +14,14 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  late TimeOfDay _selectedTime;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController();
-    _descriptionController = TextEditingController();
+    _titleController = TextEditingController(text: widget.event?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.event?.description ?? '');
+    _selectedTime = widget.event?.time ?? TimeOfDay.now();
   }
 
   @override
@@ -51,9 +55,9 @@ class _EventScreenState extends State<EventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Nuevo Evento"),
+        title: Text(widget.event == null ? "Nuevo Evento" : "Editar Evento"),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 189, 140, 207), // Cambiar el color del AppBar
+        backgroundColor: Color.fromARGB(255, 189, 140, 207),
         foregroundColor: Colors.white,
       ),
       body: Container(

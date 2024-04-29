@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:agenda/calendario.dart';
-import 'package:agenda/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agenda/login_screen.dart';
+import 'package:agenda/calendario.dart';
 import 'firebase_options.dart';
 
-void main() async{
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-);
+  );
   runApp(const MyApp());
 }
 
@@ -34,9 +35,18 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 5), () {
+    checkAuthState();
+  }
+
+  Future<void> checkAuthState() async {
+    await Firebase.initializeApp();
+    User? user = FirebaseAuth.instance.currentUser;
+    await Future.delayed(Duration(seconds: 5));
+    if (user != null) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Calendar(user: user)));
+    } else {
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
-    });
+    }
   }
 
   @override
@@ -62,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Center(
             child: Text(
               'Cargando...',
-              style: GoogleFonts.chilanka(
+              style: TextStyle(
                 fontSize: 24,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
