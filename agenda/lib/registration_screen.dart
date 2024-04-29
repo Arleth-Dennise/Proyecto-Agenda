@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:prueba/calendario.dart';
-import 'package:prueba/login_screen.dart';
+import 'package:agenda/calendario.dart';
+import 'package:agenda/login_screen.dart';
 
 class RegistrationScreen extends StatelessWidget {
   @override
