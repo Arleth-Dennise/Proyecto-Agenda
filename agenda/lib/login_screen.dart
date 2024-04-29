@@ -1,9 +1,6 @@
-agenda(login,registration,main)
-
-//login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:prueba/calendario.dart';
-import 'package:prueba/registration_screen.dart';
+import 'package:agenda/calendario.dart';
+import 'package:agenda/registration_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
