@@ -56,14 +56,17 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
   }
 
   void _addEvent(DateTime date, String title, String description, TimeOfDay time) {
+    String defaultTitle = title.isEmpty ? 'Titulo' : title;
+    String defaultDescription = description.isEmpty ? 'Descripción del evento' : description;
+
     setState(() {
       selectedEvents.update(
         date,
         (existingEvents) => [
           ...existingEvents,
-          Event(title: title, description: description, time: time)
+          Event(title: defaultTitle, description: defaultDescription, time: time)
         ],
-        ifAbsent: () => [Event(title: title, description: description, time: time)],
+        ifAbsent: () => [Event(title: defaultTitle, description: defaultDescription, time: time)],
       );
     });
     saveEventsToFirestore();
@@ -95,7 +98,7 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar:AppBar(
         title: Text("Agenda"),
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 189, 140, 207),
@@ -196,12 +199,12 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                                         String title = value['title'];
                                         String description = value['description'];
                                         TimeOfDay time = value['time'];
-                                        _editEvent(selectedDay, index, title, description, time);
+                                       _editEvent(selectedDay, index, title, description, time);
                                       }
                                     });
                                   },
                                   child: Text("Editar"),
-                                  style: TextButton.styleFrom(
+                                style: TextButton.styleFrom(
                                     foregroundColor: const Color.fromARGB(255, 28, 148, 32),
                                   ),
                                 ),
